@@ -20,21 +20,22 @@ app.get('/api/search', async (req, res) => {
     const results = await searchITunes(term, { limit });
     if (includeAnim) {
       await Promise.all(results.map(async (r) => {
-        if (!r.collectionViewUrl) return;
-        const cached = animCache.get(r.collectionViewUrl);
+        if (!r.collectionId) return;
+        const cacheKey = `album:${r.collectionId}`;
+        const cached = animCache.get(cacheKey);
         if (cached !== undefined) {
           r.animation = cached;
           return;
         }
         try {
-          const data = await getAnimation(r.collectionViewUrl);
+          const data = await getAnimation({ id: r.collectionId, kind: 'album' });
           const out = (data.best || data.bestTall) ? {
             best: data.best,
             bestTall: data.bestTall,
             square: data.square,
             tall: data.tall,
           } : null;
-          animCache.set(r.collectionViewUrl, out);
+          animCache.set(cacheKey, out);
           r.animation = out;
         } catch {
           r.animation = null;
