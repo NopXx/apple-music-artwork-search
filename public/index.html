@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apple Music Artwork Search</title>
+<style>
+  :root {
+    --bg: #0b0b0e;
+    --panel: #16161c;
+    --panel2: #1f1f28;
+    --text: #f2f2f7;
+    --muted: #9a9aa8;
+    --accent: #fa2d48;
+    --border: #2a2a35;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; }
+  header { padding: 24px 20px 12px; max-width: 1200px; margin: 0 auto; }
+  h1 { margin:0 0 4px; font-size: 22px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .search { display:flex; gap: 8px; max-width: 1200px; margin: 16px auto 0; padding: 0 20px; }
+  .search input {
+    flex:1; background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; font-size: 15px; outline: none;
+  }
+  .search input:focus { border-color: var(--accent); }
+  .search button {
+    background: var(--accent); color:#fff; border:0; border-radius: 12px;
+    padding: 0 18px; font-weight: 600; cursor: pointer; font-size: 15px;
+  }
+  .search button:hover { filter: brightness(1.1); }
+  main { max-width: 1200px; margin: 0 auto; padding: 16px 20px 60px; }
+  .grid {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; cursor: pointer; transition: transform .15s, border-color .15s;
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .card img { width:100%; aspect-ratio: 1/1; display:block; object-fit: cover; background: #000; }
+  .card .meta { padding: 10px 12px; }
+  .card .t { font-size: 13px; font-weight: 600; line-height:1.3; overflow:hidden; text-overflow: ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .card .a { font-size: 12px; color: var(--muted); margin-top: 4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .empty, .loading { color: var(--muted); text-align:center; padding: 60px 20px; }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius:50%; animation: spin .9s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* modal */
+  .modal { position: fixed; inset:0; background: rgba(0,0,0,.75); display:none; align-items:center; justify-content:center; padding: 20px; z-index: 100; backdrop-filter: blur(8px); }
+  .modal.show { display:flex; }
+  .modal-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 18px;
+    width: min(900px, 100%); max-height: 92vh; overflow:auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  }
+  @media (max-width: 720px) { .modal-card { grid-template-columns: 1fr; } }
+  .modal-art { background: #000; aspect-ratio: 1/1; position: relative; transition: aspect-ratio .25s; }
+  .modal-art.tall { aspect-ratio: 9/16; }
+  .modal-art img, .modal-art video { width:100%; height:100%; object-fit: contain; display:block; background: #000; }
+  .modal-art .badge { position:absolute; top:10px; left:10px; background: rgba(0,0,0,.65); padding: 4px 10px; border-radius: 999px; font-size: 11px; }
+  .modal-info { padding: 20px; display:flex; flex-direction: column; gap: 14px; }
+  .modal-info .title { font-size: 18px; font-weight: 700; line-height:1.3; }
+  .modal-info .artist { color: var(--muted); font-size: 14px; }
+  .row { display:flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    background: var(--panel2); color: var(--text); border:1px solid var(--border); border-radius: 10px;
+    padding: 9px 12px; font-size: 13px; cursor: pointer; text-decoration: none; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color:#fff; font-weight:600; }
+  .btn.primary:hover { filter: brightness(1.1); }
+  .seg { display:flex; gap: 4px; background: var(--panel2); border:1px solid var(--border); padding: 4px; border-radius: 10px; }
+  .seg button { background: transparent; color: var(--text); border:0; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+  .seg button.active { background: var(--accent); color:#fff; }
+  .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+  .url-box { word-break: break-all; font-size: 11px; color: var(--muted); background: var(--panel2); border:1px solid var(--border); border-radius: 8px; padding: 8px 10px; max-height: 80px; overflow:auto; }
+  .close { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.5); color:#fff; border:0; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size: 18px; line-height:1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Apple Music Artwork Search</h1>
+  <div class="sub">ค้นหา artwork (รวมถึง animated artwork) จาก Apple Music ผ่าน iTunes Search API</div>
+</header>
+<div class="search">
+  <input id="q" placeholder="พิมพ์ชื่อเพลง / ศิลปิน / อัลบั้ม..." autofocus>
+  <button id="go">Search</button>
+</div>
+<main>
+  <div id="status" class="empty">เริ่มต้นด้วยการพิมพ์ในช่องค้นหา</div>
+  <div id="grid" class="grid" style="display:none"></div>
+</main>
+
+<div id="modal" class="modal">
+  <div class="modal-card">
+    <div class="modal-art" id="modalArt">
+      <button class="close" id="modalClose">×</button>
+    </div>
+    <div class="modal-info">
+      <div>
+        <div class="title" id="mTitle"></div>
+        <div class="artist" id="mArtist"></div>
+      </div>
+      <div>
+        <div class="label">Artwork size</div>
+        <div class="seg" id="sizeSeg">
+          <button data-size="600">600</button>
+          <button data-size="1000" class="active">1000</button>
+          <button data-size="3000">3000</button>
+        </div>
+      </div>
+      <div id="animRow" style="display:none">
+        <div class="label">Animated artwork</div>
+        <div class="seg" id="orientSeg" style="margin-bottom:6px"></div>
+        <div class="seg" id="resSeg"></div>
+      </div>
+      <div class="row">
+        <a class="btn primary" id="dlBtn" href="#" download>Download</a>
+        <button class="btn" id="copyBtn">Copy URL</button>
+        <a class="btn" id="appleBtn" target="_blank" rel="noopener">Apple Music</a>
+      </div>
+      <div>
+        <div class="label">Current URL</div>
+        <div class="url-box" id="urlBox"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const grid = $('grid'), status = $('status');
+let lastResults = [], current = null, currentSize = 1000, currentAnim = null, currentTall = false;
+
+async function search() {
+  const term = $('q').value.trim();
+  if (!term) return;
+  grid.style.display = 'none';
+  status.style.display = 'block';
+  status.className = 'loading';
+  status.innerHTML = '<div class="spinner"></div>กำลังค้นหา...';
+  try {
+    const r = await fetch('/api/search?term=' + encodeURIComponent(term));
+    const data = await r.json();
+    lastResults = data.results || [];
+    if (!lastResults.length) {
+      status.className = 'empty';
+      status.textContent = 'ไม่พบผลลัพธ์';
+      return;
+    }
+    grid.innerHTML = lastResults.map((it, i) => `
+      <div class="card" data-i="${i}">
+        <img src="${it.artwork}" loading="lazy" alt="">
+        <div class="meta">
+          <div class="t">${escapeHtml(it.track)}</div>
+          <div class="a">${escapeHtml(it.artist)}</div>
+        </div>
+      </div>
+    `).join('');
+    grid.style.display = 'grid';
+    status.style.display = 'none';
+    grid.querySelectorAll('.card').forEach(c => {
+      c.addEventListener('click', () => openModal(Number(c.dataset.i)));
+    });
+  } catch (e) {
+    status.className = 'empty';
+    status.textContent = 'เกิดข้อผิดพลาด: ' + e.message;
+  }
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function urlForSize(it, size) {
+  if (!it.artworkSmall) return it.artwork;
+  return it.artworkSmall.replace(/\/\d+x\d+bb\.(jpg|png)/i, `/${size}x${size}bb.$1`);
+}
+
+function openModal(i) {
+  const it = lastResults[i];
+  if (!it) return;
+  current = it;
+  currentSize = 1000;
+  currentAnim = null;
+  currentTall = false;
+  $('mTitle').textContent = it.track;
+  $('mArtist').textContent = `${it.artist} · ${it.album || ''}`;
+  $('appleBtn').href = it.trackViewUrl || it.collectionViewUrl || '#';
+  $('animRow').style.display = 'none';
+  $('resSeg').innerHTML = '';
+  $('orientSeg').innerHTML = '';
+  $('sizeSeg').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.size === '1000'));
+
+  const anim = it.animation;
+  if (anim) {
+    const square = anim.square || {};
+    const tall = anim.tall || {};
+    const hasSquare = Object.keys(square).length > 0;
+    const hasTall = Object.keys(tall).length > 0;
+    if (hasSquare || hasTall) {
+      $('animRow').style.display = '';
+      const orientations = [];
+      if (hasSquare) orientations.push({ key: 'square', label: 'Square 1:1', map: square });
+      if (hasTall) orientations.push({ key: 'tall', label: 'Tall 9:16', map: tall });
+
+      const renderResButtons = (map) => {
+        const keys = Object.keys(map).sort((a, b) => parseInt(b, 10) - parseInt(a, 10));
+        const preferred = keys.find(k => parseInt(k, 10) <= 1080) || keys[0];
+        $('resSeg').innerHTML = keys.map(k => `<button data-url="${map[k]}" ${k === preferred ? 'class="active"' : ''}>${k}</button>`).join('');
+        $('resSeg').querySelectorAll('button').forEach(b => {
+          b.addEventListener('click', () => {
+            $('resSeg').querySelectorAll('button').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            currentAnim = b.dataset.url;
+            renderArt();
+          });
+        });
+        currentAnim = map[preferred];
+      };
+
+      $('orientSeg').innerHTML = orientations.map((o, i) => `<button data-key="${o.key}" ${i === 0 ? 'class="active"' : ''}>${o.label}</button>`).join('');
+      $('orientSeg').querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', () => {
+          $('orientSeg').querySelectorAll('button').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          const o = orientations.find(x => x.key === b.dataset.key);
+          currentTall = o.key === 'tall';
+          renderResButtons(o.map);
+          renderArt();
+        });
+      });
+      currentTall = orientations[0].key === 'tall';
+      renderResButtons(orientations[0].map);
+    }
+  }
+  renderArt();
+  $('modal').classList.add('show');
+}
+
+function renderArt() {
+  const art = $('modalArt');
+  const closeBtn = '<button class="close" id="modalClose">×</button>';
+  art.classList.toggle('tall', !!currentAnim && currentTall);
+  if (currentAnim) {
+    const badge = currentTall ? 'Tall · 9:16' : 'Square · 1:1';
+    art.innerHTML = closeBtn + `<video src="${currentAnim}" autoplay loop muted playsinline></video><div class="badge">${badge}</div>`;
+    $('dlBtn').href = currentAnim;
+    $('dlBtn').download = (current.track || 'artwork') + (currentTall ? '-tall.mp4' : '.mp4');
+    $('urlBox').textContent = currentAnim;
+  } else {
+    const url = urlForSize(current, currentSize);
+    art.innerHTML = closeBtn + `<img src="${url}" alt=""><div class="badge">${currentSize}×${currentSize}</div>`;
+    $('dlBtn').href = url;
+    $('dlBtn').download = (current.track || 'artwork') + `-${currentSize}.jpg`;
+    $('urlBox').textContent = url;
+  }
+  $('modalClose').addEventListener('click', closeModal);
+}
+
+function closeModal() { $('modal').classList.remove('show'); }
+
+$('go').addEventListener('click', search);
+$('q').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+$('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeModal(); });
+$('sizeSeg').querySelectorAll('button').forEach(b => {
+  b.addEventListener('click', () => {
+    $('sizeSeg').querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    currentSize = Number(b.dataset.size);
+    currentAnim = null;
+    currentTall = false;
+    $('resSeg').querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    renderArt();
+  });
+});
+$('copyBtn').addEventListener('click', async () => {
+  const url = $('urlBox').textContent;
+  try { await navigator.clipboard.writeText(url); $('copyBtn').textContent = 'Copied!'; setTimeout(() => $('copyBtn').textContent = 'Copy URL', 1200); } catch {}
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
