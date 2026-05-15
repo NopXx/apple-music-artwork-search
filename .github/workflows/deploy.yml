@@ -1,0 +1,25 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USERNAME }}
+          key: ${{ vars.SSH_KEY }}
+
+          script: |
+            cd ~/apps/apple-music-artwork-search
+            git pull
+            cd ~/apps
+            docker compose up -d --build apple-music-artwork-search
