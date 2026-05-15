@@ -22,4 +22,4 @@ jobs:
             cd ~/apps/apple-music-artwork-search
             git pull
             cd ~/apps
-            docker compose up -d --build apple-music-artwork-search
+            docker compose up -d --build artwork
