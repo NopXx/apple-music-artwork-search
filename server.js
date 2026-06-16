@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { searchITunes, getAnimation, LRU } from './lib/artwork.js';
+import { searchITunes, getAnimation, diagnoseMotion, parseAppleMusicUrl, LRU } from './lib/artwork.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -46,6 +46,24 @@ app.get('/api/search', async (req, res) => {
   } catch (e) {
     console.error('[api/search]', e);
     res.status(502).json({ error: e.message || 'search failed' });
+  }
+});
+
+// Diagnostic: GET /api/debug?id=<albumId>&kind=album  OR  ?term=<appleMusicUrl>
+app.get('/api/debug', async (req, res) => {
+  let id = (req.query.id || '').toString();
+  let kind = (req.query.kind || 'album').toString();
+  const term = (req.query.term || '').toString();
+  if (term) {
+    const parsed = parseAppleMusicUrl(term);
+    if (parsed) { id = parsed.id; kind = parsed.kind === 'track' ? 'track' : 'album'; }
+  }
+  if (!id) return res.status(400).json({ error: 'provide id (+kind) or term' });
+  try {
+    const result = await diagnoseMotion({ id, kind });
+    res.json({ id, kind, ...result });
+  } catch (e) {
+    res.status(500).json({ error: e.message, stack: e.stack });
   }
 });
 
