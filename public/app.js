@@ -2,9 +2,9 @@ const byId = (id) => document.getElementById(id);
 
 const el = {
   searchInput: byId('searchInput'),
-  searchInputInline: byId('searchInputInline'),
+  searchInputNav: byId('searchInputNav'),
   searchClear: byId('searchClear'),
-  searchClearInline: byId('searchClearInline'),
+  nav: document.querySelector('.nav'),
   heroSection: byId('heroSection'),
   status: byId('status'),
   resultsSection: byId('results-section'),
@@ -41,17 +41,18 @@ function urlForSize(it, size) {
 }
 
 async function search() {
-  const term = el.searchInputInline.value.trim() || el.searchInput.value.trim();
+  const term = el.searchInputNav.value.trim() || el.searchInput.value.trim();
   if (!term) return;
 
   el.searchInput.value = term;
-  el.searchInputInline.value = term;
+  el.searchInputNav.value = term;
 
+  document.body.classList.add('has-results');
   el.heroSection.classList.add('hidden');
-  el.resultsSection.style.display = 'none';
-  el.status.style.display = '';
+  el.resultsSection.hidden = true;
+  el.status.hidden = false;
   el.status.className = 'loading';
-  el.status.innerHTML = '<div class="spinner"></div>Searching\u2026';
+  el.status.textContent = 'Searching\u2026';
 
   try {
     const r = await fetch('/api/search?term=' + encodeURIComponent(term));
@@ -72,19 +73,24 @@ async function search() {
 }
 
 function renderGrid() {
-  el.grid.innerHTML = lastResults.map((it, i) => `
+  el.grid.innerHTML = lastResults.map((it, i) => {
+    const hasMotion = it.animation && (it.animation.best || it.animation.bestTall);
+    return `
     <div class="card" data-index="${i}" style="animation-delay:${Math.min(i * 40, 400)}ms">
-      <img class="card-art" src="${it.artwork}" loading="lazy" alt="${escapeHtml(it.track)}">
+      <div class="card-art-wrap">
+        <img class="card-art" src="${it.artwork}" loading="lazy" alt="${escapeHtml(it.track)}">
+        ${hasMotion ? '<span class="motion-badge"><span class="motion-dot"></span>Motion</span>' : ''}
+      </div>
       <div class="card-meta">
         <div class="card-title">${escapeHtml(it.track)}</div>
         <div class="card-artist">${escapeHtml(it.artist)}</div>
       </div>
     </div>
-  `).join('');
+  `;}).join('');
 
   el.resultCount.textContent = `${lastResults.length} result${lastResults.length !== 1 ? 's' : ''}`;
-  el.resultsSection.style.display = 'block';
-  el.status.style.display = 'none';
+  el.resultsSection.hidden = false;
+  el.status.hidden = true;
 
   el.grid.querySelectorAll('.card').forEach(card => {
     card.addEventListener('click', () => openModal(Number(card.dataset.index)));
@@ -102,13 +108,15 @@ function openModal(i) {
   el.mTitle.textContent = it.track;
   el.mArtist.textContent = it.artist + (it.album ? ' \u00b7 ' + it.album : '');
   el.appleBtn.href = it.trackViewUrl || it.collectionViewUrl || '#';
-  el.animRow.style.display = 'none';
+  el.animRow.hidden = true;
   el.resSeg.innerHTML = '';
   el.orientSeg.innerHTML = '';
 
-  el.sizeSeg.querySelectorAll('button').forEach(b =>
-    b.classList.toggle('active', b.dataset.size === '1000')
-  );
+  el.sizeSeg.querySelectorAll('button').forEach(b => {
+    const on = b.dataset.size === '1000';
+    b.classList.toggle('active', on);
+    b.classList.toggle('on', on);
+  });
 
   const anim = it.animation;
   if (anim) {
@@ -118,7 +126,7 @@ function openModal(i) {
     const hasTall = Object.keys(tall).length > 0;
 
     if (hasSquare || hasTall) {
-      el.animRow.style.display = '';
+      el.animRow.hidden = false;
 
       const orientations = [];
       if (hasSquare) orientations.push({ key: 'square', label: 'Square 1:1', map: square });
@@ -127,16 +135,13 @@ function openModal(i) {
       const renderResButtons = (map) => {
         const keys = Object.keys(map).sort((a, b) => parseInt(b, 10) - parseInt(a, 10));
         const preferred = keys.find(k => parseInt(k, 10) <= 1080) || keys[0];
-        el.resSeg.innerHTML = keys.map(k =>
-          `<button data-url="${map[k]}" ${k === preferred ? 'class="active"' : ''}>${k}</button>`
-        ).join('');
-        el.resSeg.querySelectorAll('button').forEach(b => {
-          b.addEventListener('click', () => {
-            el.resSeg.querySelectorAll('button').forEach(x => x.classList.remove('active'));
-            b.classList.add('active');
-            currentAnim = b.dataset.url;
-            renderArt();
-          });
+        el.resSeg.innerHTML = `<select>${keys.map(k =>
+          `<option value="${map[k]}" ${k === preferred ? 'selected' : ''}>${k}</option>`
+        ).join('')}</select>`;
+        const sel = el.resSeg.querySelector('select');
+        sel.addEventListener('change', () => {
+          currentAnim = sel.value;
+          renderArt();
         });
         currentAnim = map[preferred];
       };
@@ -205,28 +210,18 @@ el.searchInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') search();
 });
 
-el.searchInputInline.addEventListener('keydown', (e) => {
+el.searchInputNav.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') search();
 });
 
 el.searchInput.addEventListener('input', () => {
-  el.searchClear.classList.toggle('visible', el.searchInput.value.length > 0);
-});
-
-el.searchInputInline.addEventListener('input', () => {
-  el.searchClearInline.classList.toggle('visible', el.searchInputInline.value.length > 0);
+  el.searchClear.classList.toggle('show', el.searchInput.value.length > 0);
 });
 
 el.searchClear.addEventListener('click', () => {
   el.searchInput.value = '';
-  el.searchClear.classList.remove('visible');
+  el.searchClear.classList.remove('show');
   el.searchInput.focus();
-});
-
-el.searchClearInline.addEventListener('click', () => {
-  el.searchInputInline.value = '';
-  el.searchClearInline.classList.remove('visible');
-  el.searchInputInline.focus();
 });
 
 el.modal.addEventListener('click', (e) => {
@@ -237,8 +232,9 @@ el.modalCloseBtn.addEventListener('click', closeModal);
 
 el.sizeSeg.querySelectorAll('button').forEach(b => {
   b.addEventListener('click', () => {
-    el.sizeSeg.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    el.sizeSeg.querySelectorAll('button').forEach(x => { x.classList.remove('active'); x.classList.remove('on'); });
     b.classList.add('active');
+    b.classList.add('on');
     currentSize = Number(b.dataset.size);
     currentAnim = null;
     currentTall = false;
@@ -252,4 +248,10 @@ el.copyBtn.addEventListener('click', copyUrl);
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeModal();
+});
+
+byId('themeToggle').addEventListener('click', () => {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('theme', next);
 });
