@@ -35,7 +35,7 @@ app.get('/api/search', async (req, res) => {
             square: data.square,
             tall: data.tall,
           } : null;
-          animCache.set(cacheKey, out);
+          if (out) animCache.set(cacheKey, out);
           r.animation = out;
         } catch {
           r.animation = null;
