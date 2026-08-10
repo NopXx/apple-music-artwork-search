@@ -256,6 +256,7 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
   margin-left: 10px;
   text-transform: uppercase;
 }
+.bar #filterSeg { margin-left: auto; align-self: center; }
 .bar .search.inline { min-width: 280px; }
 
 .grid {
@@ -452,6 +453,7 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
 }
 
 .select { display: inline-block; }
+.select[hidden] { display: none; }
 .select select {
   font-family: var(--mono);
   font-size: 12px;

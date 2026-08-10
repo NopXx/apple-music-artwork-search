@@ -9,6 +9,7 @@ const el = {
   status: byId('status'),
   resultsSection: byId('results-section'),
   resultCount: byId('resultCount'),
+  filterSeg: byId('filterSeg'),
   grid: byId('grid'),
   modal: byId('modal'),
   modalArtwork: byId('modalArtwork'),
@@ -26,6 +27,7 @@ const el = {
 };
 
 let lastResults = [];
+let currentFilter = 'all';
 let current = null;
 let currentSize = 1000;
 let currentAnim = null;
@@ -72,23 +74,32 @@ async function search() {
   }
 }
 
+function hasMotion(it) {
+  return !!(it.animation && (it.animation.best || it.animation.bestTall));
+}
+
 function renderGrid() {
-  el.grid.innerHTML = lastResults.map((it, i) => {
-    const hasMotion = it.animation && (it.animation.best || it.animation.bestTall);
-    return `
-    <div class="card" data-index="${i}" style="animation-delay:${Math.min(i * 40, 400)}ms">
+  // Keep original indices so openModal(lastResults[i]) stays correct after filtering.
+  const shown = lastResults
+    .map((it, i) => ({ it, i }))
+    .filter(({ it }) =>
+      currentFilter === 'motion' ? hasMotion(it) :
+      currentFilter === 'static' ? !hasMotion(it) : true);
+
+  el.grid.innerHTML = shown.map(({ it, i }, n) => `
+    <div class="card" data-index="${i}" style="animation-delay:${Math.min(n * 40, 400)}ms">
       <div class="card-art-wrap">
         <img class="card-art" src="${it.artwork}" loading="lazy" alt="${escapeHtml(it.track)}">
-        ${hasMotion ? '<span class="motion-badge"><span class="motion-dot"></span>Motion</span>' : ''}
+        ${hasMotion(it) ? '<span class="motion-badge"><span class="motion-dot"></span>Motion</span>' : ''}
       </div>
       <div class="card-meta">
         <div class="card-title">${escapeHtml(it.track)}</div>
         <div class="card-artist">${escapeHtml(it.artist)}</div>
       </div>
     </div>
-  `;}).join('');
+  `).join('');
 
-  el.resultCount.textContent = `${lastResults.length} result${lastResults.length !== 1 ? 's' : ''}`;
+  el.resultCount.textContent = `${shown.length} result${shown.length !== 1 ? 's' : ''}`;
   el.resultsSection.hidden = false;
   el.status.hidden = true;
 
@@ -146,23 +157,30 @@ function openModal(i) {
         currentAnim = map[preferred];
       };
 
-      el.orientSeg.innerHTML = orientations.map((o, idx) =>
-        `<button data-key="${o.key}" ${idx === 0 ? 'class="active"' : ''}>${o.label}</button>`
-      ).join('');
+      // "Still" toggles motion off; orientation buttons turn it on.
+      el.orientSeg.innerHTML =
+        `<button data-key="still" class="active">Still</button>` +
+        orientations.map(o => `<button data-key="${o.key}">${o.label}</button>`).join('');
 
       el.orientSeg.querySelectorAll('button').forEach(b => {
         b.addEventListener('click', () => {
           el.orientSeg.querySelectorAll('button').forEach(x => x.classList.remove('active'));
           b.classList.add('active');
-          const o = orientations.find(x => x.key === b.dataset.key);
-          currentTall = o.key === 'tall';
-          renderResButtons(o.map);
+          if (b.dataset.key === 'still') {
+            currentAnim = null;
+            currentTall = false;
+            el.resSeg.hidden = true;
+          } else {
+            const o = orientations.find(x => x.key === b.dataset.key);
+            currentTall = o.key === 'tall';
+            el.resSeg.hidden = false;
+            renderResButtons(o.map);
+          }
           renderArt();
         });
       });
 
-      currentTall = orientations[0].key === 'tall';
-      renderResButtons(orientations[0].map);
+      el.resSeg.hidden = true;
     }
   }
 
@@ -238,8 +256,19 @@ el.sizeSeg.querySelectorAll('button').forEach(b => {
     currentSize = Number(b.dataset.size);
     currentAnim = null;
     currentTall = false;
-    el.resSeg.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    el.orientSeg.querySelectorAll('button').forEach(x => x.classList.toggle('active', x.dataset.key === 'still'));
+    el.resSeg.hidden = true;
     renderArt();
+  });
+});
+
+el.filterSeg.querySelectorAll('button').forEach(b => {
+  b.addEventListener('click', () => {
+    el.filterSeg.querySelectorAll('button').forEach(x => { x.classList.remove('active'); x.classList.remove('on'); });
+    b.classList.add('active');
+    b.classList.add('on');
+    currentFilter = b.dataset.filter;
+    renderGrid();
   });
 });
 
