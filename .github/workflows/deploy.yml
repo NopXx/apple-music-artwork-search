@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -16,10 +21,12 @@ jobs:
         with:
           host: ${{ vars.HOST }}
           username: ${{ vars.USERNAME }}
-          key: ${{ vars.SSH_KEY }}
+          # Private key must be a secret (masked in logs), never a repo variable.
+          key: ${{ secrets.SSH_KEY }}
 
+          # Run scripts/deploy.sh as it is on origin/main: fetch, hard-reset,
+          # rebuild the artwork container, wait for it to answer HTTP.
           script: |
-            cd ~/apps/apple-music-artwork-search
-            git pull
-            cd ~/apps
-            docker compose up -d --build artwork
+            set -e
+            git -C ~/apps/apple-music-artwork-search fetch -q origin main
+            git -C ~/apps/apple-music-artwork-search show origin/main:scripts/deploy.sh | bash
