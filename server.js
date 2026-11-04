@@ -24,19 +24,25 @@ app.get('/api/search', async (req, res) => {
         const cacheKey = `album:${r.collectionId}`;
         const cached = animCache.get(cacheKey);
         if (cached !== undefined) {
-          r.animation = cached;
+          r.animation = cached.animation;
+          r.audioTraits = cached.audioTraits;
+          r.colors = cached.colors;
           return;
         }
         try {
           const data = await getAnimation({ id: r.collectionId, kind: 'album' });
-          const out = (data.best || data.bestTall) ? {
+          const animation = (data.best || data.bestTall) ? {
             best: data.best,
             bestTall: data.bestTall,
             square: data.square,
             tall: data.tall,
           } : null;
-          if (out) animCache.set(cacheKey, out);
-          r.animation = out;
+          const audioTraits = data.audioTraits || [];
+          const colors = data.colors || null;
+          animCache.set(cacheKey, { animation, audioTraits, colors });
+          r.animation = animation;
+          r.audioTraits = audioTraits;
+          r.colors = colors;
         } catch {
           r.animation = null;
         }
