@@ -24,19 +24,25 @@ app.get('/api/search', async (req, res) => {
         const cacheKey = `album:${r.collectionId}`;
         const cached = animCache.get(cacheKey);
         if (cached !== undefined) {
-          r.animation = cached;
+          r.animation = cached.animation;
+          r.audioTraits = cached.audioTraits;
+          r.colors = cached.colors;
           return;
         }
         try {
           const data = await getAnimation({ id: r.collectionId, kind: 'album' });
-          const out = (data.best || data.bestTall) ? {
+          const animation = (data.best || data.bestTall) ? {
             best: data.best,
             bestTall: data.bestTall,
             square: data.square,
             tall: data.tall,
           } : null;
-          if (out) animCache.set(cacheKey, out);
-          r.animation = out;
+          const audioTraits = data.audioTraits || [];
+          const colors = data.colors || null;
+          animCache.set(cacheKey, { animation, audioTraits, colors });
+          r.animation = animation;
+          r.audioTraits = audioTraits;
+          r.colors = colors;
         } catch {
           r.animation = null;
         }
@@ -64,6 +70,31 @@ app.get('/api/debug', async (req, res) => {
     res.json({ id, kind, ...result });
   } catch (e) {
     res.status(500).json({ error: e.message, stack: e.stack });
+  }
+});
+
+// GitHub star count for the nav badge. Cached server-side so visitors don't
+// each spend GitHub's 60-requests/hour unauthenticated limit.
+const GITHUB_REPO = 'NopXx/apple-music-artwork-search';
+const STARS_TTL_MS = 15 * 60 * 1000;
+let starsCache = { stars: null, at: 0 };
+
+app.get('/api/stars', async (req, res) => {
+  if (starsCache.stars !== null && Date.now() - starsCache.at < STARS_TTL_MS) {
+    return res.json({ stars: starsCache.stars });
+  }
+  try {
+    const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, {
+      headers: { 'Accept': 'application/vnd.github+json', 'User-Agent': 'apple-music-artwork-search' },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!r.ok) throw new Error(`GitHub HTTP ${r.status}`);
+    const data = await r.json();
+    starsCache = { stars: data.stargazers_count ?? null, at: Date.now() };
+    res.json({ stars: starsCache.stars });
+  } catch (e) {
+    // Serve a stale count if we have one; otherwise the badge just stays hidden.
+    res.json({ stars: starsCache.stars });
   }
 });
 

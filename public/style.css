@@ -1,41 +1,74 @@
-:root {
-  --bg: #fafaf9;
-  --fg: #0a0a0a;
-  --mute: #737373;
-  --line: #e5e5e5;
-  --line-strong: #0a0a0a;
-  --card: #ffffff;
-  --accent: #e5193a;
-  --accent-fg: #ffffff;
-  --r: 14px;
-  --r-sm: 8px;
-  --r-pill: 999px;
-  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
-}
+/* ── Liquid Glass theme (after iOS 26): translucent, blurred surfaces with a
+   bright rim, floating over a soft ambient backdrop whose colours follow the
+   artwork in the current results (set from app.js as --amb1..3). ── */
+@property --amb1 { syntax: '<color>'; inherits: true; initial-value: #7cb7ff; }
+@property --amb2 { syntax: '<color>'; inherits: true; initial-value: #ff9ecf; }
+@property --amb3 { syntax: '<color>'; inherits: true; initial-value: #b9a6ff; }
 
+:root {
+  --bg: #eef1f6;
+  --fg: #0b0b0f;
+  --mute: rgba(60, 60, 67, 0.62);
+  --line: rgba(60, 60, 67, 0.14);
+  --line-strong: rgba(60, 60, 67, 0.3);
+  --card: rgba(255, 255, 255, 0.55);
+  --accent: #fa2d48;
+  --accent-fg: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.42);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-hl: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(255, 255, 255, 0.25);
+  --glass-shadow: 0 10px 30px rgba(20, 30, 60, 0.1), 0 1px 3px rgba(20, 30, 60, 0.06);
+  --glass-blur: blur(24px) saturate(180%);
+  --field-bg: rgba(118, 118, 128, 0.12);
+  --seg-on: rgba(255, 255, 255, 0.9);
+  --amb1: #7cb7ff; --amb2: #ff9ecf; --amb3: #b9a6ff;
+  --amb-mix: 70%;
+  --r: 18px;
+  --r-sm: 10px;
+  --r-pill: 999px;
+  --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+  transition: --amb1 1.2s ease, --amb2 1.2s ease, --amb3 1.2s ease;
+}
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #1d232a;
-    --fg: #fafaf9;
-    --mute: #8a939c;
-    --line: #2a313a;
-    --line-strong: #fafaf9;
-    --card: #232931;
+    --bg: #0b0d12;
+    --fg: #f5f5f7;
+    --mute: rgba(235, 235, 245, 0.6);
+    --line: rgba(255, 255, 255, 0.1);
+    --line-strong: rgba(255, 255, 255, 0.25);
+    --card: rgba(40, 40, 48, 0.5);
+    --glass-bg: rgba(30, 32, 40, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-hl: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+    --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.3);
+    --field-bg: rgba(118, 118, 128, 0.24);
+    --seg-on: rgba(255, 255, 255, 0.16);
+    --amb1: #2b5cff; --amb2: #b4327a; --amb3: #6b3fd6;
+    --amb-mix: 45%;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #1d232a;
-  --fg: #fafaf9;
-  --mute: #8a939c;
-  --line: #2a313a;
-  --line-strong: #fafaf9;
-  --card: #232931;
+  --bg: #0b0d12;
+  --fg: #f5f5f7;
+  --mute: rgba(235, 235, 245, 0.6);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.25);
+  --card: rgba(40, 40, 48, 0.5);
+  --glass-bg: rgba(30, 32, 40, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-hl: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --field-bg: rgba(118, 118, 128, 0.24);
+  --seg-on: rgba(255, 255, 255, 0.16);
+  --amb1: #2b5cff; --amb2: #b4327a; --amb3: #6b3fd6;
+  --amb-mix: 45%;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body { background: var(--bg); color: var(--fg); }
+html { background: var(--bg); color: var(--fg); }
 body {
   font-family: var(--sans);
   font-size: 15px;
@@ -44,32 +77,73 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: transparent;
+  color: var(--fg);
 }
+/* Ambient backdrop the glass refracts: three soft colour fields, drifting. */
+body::before {
+  content: "";
+  position: fixed; inset: -10%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(45% 40% at 18% 12%, color-mix(in srgb, var(--amb1) var(--amb-mix), transparent), transparent 70%),
+    radial-gradient(40% 38% at 85% 22%, color-mix(in srgb, var(--amb2) var(--amb-mix), transparent), transparent 70%),
+    radial-gradient(55% 45% at 50% 95%, color-mix(in srgb, var(--amb3) var(--amb-mix), transparent), transparent 72%);
+  filter: blur(20px);
+  animation: amb-drift 28s ease-in-out infinite alternate;
+}
+@keyframes amb-drift {
+  to { transform: translate3d(3%, -2%, 0) scale(1.08) rotate(4deg); }
+}
+@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
 
 button, input { font: inherit; color: inherit; background: none; border: none; outline: none; }
 button { cursor: pointer; }
 a { color: inherit; text-decoration: none; }
 
+/* Shared glass material. */
+.nav, .search, .eyebrow, .caps li, #status, .bar #filterSeg, .card, .github-link, .theme-switch {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-hl), var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* ── Nav: floating glass capsule ── */
 .nav {
   position: sticky;
-  top: 0;
+  top: 12px;
   z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 32px;
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  gap: 24px;
+  gap: 16px;
+  width: calc(100% - 32px);
+  max-width: 1248px;
+  margin: 12px auto 0;
+  padding: 8px 8px 8px 18px;
+  border-radius: var(--r-pill);
+  font-size: 13px;
 }
+.brand {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.brand-icon {
+  width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #ff5f6d, var(--accent));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 2px 6px rgba(250,45,72,0.35);
+  color: #fff;
+}
+.brand-icon svg { width: 15px; height: 15px; }
+.brand span { color: var(--mute); font-weight: 600; }
 .nav .nav-search {
   flex: 1;
-  max-width: 480px;
+  max-width: 460px;
   display: none;
   position: relative;
 }
@@ -79,152 +153,208 @@ body.has-results .nav .nav-search { display: flex; }
   color: var(--mute);
   flex-shrink: 0;
 }
-.brand { font-weight: 700; }
-.brand span { color: var(--accent); font-weight: 700; }
-.nav-meta { color: var(--mute); text-transform: uppercase; }
-.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-meta { color: var(--mute); font-size: 12px; white-space: nowrap; }
+.nav-right { display: flex; align-items: center; gap: 8px; }
 .github-link {
-  width: 32px; height: 32px;
+  width: 36px; height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--mute);
-  border-radius: var(--r-pill);
-  transition: color .15s, background .15s;
+  color: var(--fg);
+  border-radius: 50%;
+  transition: transform .15s;
 }
-.github-link:hover { color: var(--fg); background: var(--line); }
-.github-link svg { width: 18px; height: 18px; }
+.github-link:hover { transform: scale(1.06); }
+.github-link svg { width: 17px; height: 17px; }
+/* With a star count the circle becomes a pill: GitHub mark · ★ n. */
+.github-link.has-stars { width: auto; padding: 0 12px 0 10px; gap: 7px; border-radius: var(--r-pill); }
+.github-link.has-stars:hover { transform: scale(1.04); }
+.gh-stars {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding-left: 7px; border-left: 1px solid var(--line);
+  font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.gh-stars[hidden] { display: none; }
+.gh-stars svg { width: 13px; height: 13px; color: #f5b400; }
+
+/* iOS-style switch inside a glass pill (theme toggle). */
 .theme-switch {
-  background: none;
-  border: none;
-  padding: 0;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  height: 36px;
+  padding: 0 4px 0 12px;
+  border-radius: var(--r-pill);
   cursor: pointer;
 }
 .switch-track {
-  width: 40px; height: 22px;
+  order: 2;
+  width: 46px; height: 28px;
   border-radius: 999px;
-  background: var(--line);
-  border: 1px solid var(--line-strong);
+  background: rgba(120, 120, 128, 0.28);
   position: relative;
-  transition: background .2s, border-color .2s;
+  transition: background .25s;
   display: block;
 }
-[data-theme="dark"] .switch-track { background: var(--accent); border-color: var(--accent); }
+[data-theme="dark"] .switch-track { background: var(--accent); }
 .switch-thumb {
   position: absolute;
   top: 2px; left: 2px;
-  width: 16px; height: 16px;
+  width: 24px; height: 24px;
   border-radius: 50%;
-  background: var(--fg);
-  transition: transform .2s;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15), 0 1px 1px rgba(0,0,0,0.16);
+  transition: transform .3s cubic-bezier(.3, 1.4, .5, 1);
 }
-[data-theme="dark"] .switch-thumb { transform: translateX(18px); background: #fff; }
-.switch-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--mute);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.switch-label::before { content: 'LIGHT'; }
-[data-theme="dark"] .switch-label::before { content: 'DARK'; }
+[data-theme="dark"] .switch-thumb { transform: translateX(18px); }
+.switch-label { order: 1; font-size: 12px; font-weight: 500; color: var(--mute); }
+.switch-label::before { content: 'Light'; }
+[data-theme="dark"] .switch-label::before { content: 'Dark'; }
 
 main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px; }
 
-.hero { padding: 96px 0 80px; max-width: 880px; }
+/* ── Hero ── */
+.hero { padding: 88px 0 72px; max-width: 880px; }
 .eyebrow {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 600;
   color: var(--accent);
   margin-bottom: 28px;
 }
 .hero h1 {
-  font-size: clamp(48px, 7vw, 88px);
-  font-weight: 900;
-  line-height: 0.95;
-  letter-spacing: -0.04em;
-  margin-bottom: 48px;
+  font-family: var(--display);
+  font-size: clamp(46px, 7vw, 84px);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  margin-bottom: 44px;
 }
 .hero h1 .dot { color: var(--accent); }
 
+/* ── Search field, after iOS 26: a glass capsule with the magnifier on the
+   left, a clear (×) that appears once there's text, and a round accent
+   submit button. Focus lifts the glass with a soft glow, not a hard ring. ── */
 .search {
   position: relative;
   display: flex;
   align-items: center;
-  border: 1px solid var(--line-strong);
-  background: var(--card);
-  padding: 18px 22px;
-  gap: 12px;
-  border-radius: var(--r);
-  transition: box-shadow .15s, border-color .15s;
+  height: 60px;
+  padding: 0 8px 0 20px;
+  gap: 10px;
+  border-radius: var(--r-pill);
+  transition: box-shadow .25s, border-color .25s, background .25s;
 }
 .search:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(229, 25, 58, 0.18);
+  background: color-mix(in srgb, var(--glass-bg) 70%, var(--seg-on));
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--glass-border));
+  box-shadow: var(--glass-hl), var(--glass-shadow), 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent),
+    0 12px 36px color-mix(in srgb, var(--accent) 16%, transparent);
 }
-.search-icon { width: 18px; height: 18px; color: var(--mute); flex-shrink: 0; }
+.search-icon { width: 20px; height: 20px; color: var(--mute); flex-shrink: 0; transition: color .2s; }
 .search:focus-within .search-icon { color: var(--accent); }
 .search input {
   flex: 1;
-  font-size: 16px;
+  height: 100%;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   background: transparent;
   min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
 }
-.search input::placeholder { color: var(--mute); }
-.search button {
+.search input::placeholder { color: var(--mute); font-weight: 400; }
+.search input::-webkit-search-cancel-button,
+.search input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+
+/* Clear (×): filled circle, only while there's text. */
+.search-clear {
+  flex-shrink: 0;
   width: 22px; height: 22px;
-  border-radius: 50%;
-  background: var(--line);
-  color: var(--mute);
-  font-size: 14px;
-  display: none;
-  align-items: center; justify-content: center;
-  line-height: 1;
+  display: none; align-items: center; justify-content: center;
+  color: var(--mute); opacity: 0.75;
+  transition: opacity .15s, transform .15s;
 }
-.search button.show { display: flex; }
-.search kbd {
-  font-family: var(--mono);
-  font-size: 11px;
-  padding: 4px 8px;
-  border: 1px solid var(--line);
-  color: var(--mute);
-  border-radius: var(--r-sm);
+.search-clear.show { display: flex; }
+.search-clear:hover { opacity: 1; }
+.search-clear:active { transform: scale(0.88); }
+.search-clear svg { width: 18px; height: 18px; }
+
+/* Submit: round accent button, muted until there's something to search. */
+.search-go {
+  flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  background: linear-gradient(160deg, #ff5f6d, var(--accent));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: transform .2s cubic-bezier(.3, 1.4, .5, 1), opacity .2s, filter .2s;
 }
-.search.inline { padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--r-sm); }
-.search.inline input { font-size: 14px; }
-.search.inline .search-icon { width: 14px; height: 14px; }
+.search-go svg { width: 20px; height: 20px; }
+.search-go:hover { transform: scale(1.06); }
+.search-go:active { transform: scale(0.92); }
+.search:has(input:placeholder-shown) .search-go { opacity: 0.45; filter: saturate(0.6); box-shadow: none; }
+
+/* Compact search pill inside the nav. */
+.search.inline {
+  height: 36px;
+  padding: 0 10px 0 12px;
+  gap: 8px;
+  background: var(--field-bg);
+  border: 1px solid transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.search.inline:focus-within {
+  background: var(--field-bg);
+  border-color: transparent;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.search.inline input { font-size: 14px; font-weight: 500; }
+.search.inline .search-icon { width: 15px; height: 15px; }
+.search.inline .search-clear { width: 18px; height: 18px; }
+.search.inline .search-clear svg { width: 15px; height: 15px; }
 
 .caps {
   list-style: none;
-  margin-top: 28px;
+  margin-top: 24px;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 28px;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--mute);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
 }
-.caps li::before { content: '◆ '; color: var(--accent); }
+.caps li {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+}
+.caps li::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 6px var(--accent);
+}
 
 #status {
-  padding: 48px 0;
+  width: fit-content;
+  margin: 56px auto;
+  padding: 10px 20px;
+  border-radius: var(--r-pill);
   text-align: center;
   color: var(--mute);
-  font-family: var(--mono);
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
 }
+#status[hidden] { display: none; }
 #status.loading::before {
   content: '';
   display: inline-block;
-  width: 10px; height: 10px;
-  border: 1.5px solid var(--accent);
+  width: 12px; height: 12px;
+  border: 2px solid var(--accent);
   border-top-color: transparent;
   border-radius: 50%;
   margin-right: 10px;
@@ -233,64 +363,95 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-#results-section { padding: 56px 0 80px; }
+/* ── Results ── */
+#results-section { padding: 48px 0 80px; }
 .bar {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
-  margin-bottom: 32px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--line);
+  margin-bottom: 28px;
 }
 .bar h2 {
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: -0.03em;
+  font-family: var(--display);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
   line-height: 1;
-  display: inline;
 }
 .bar #resultCount {
-  font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--mute);
-  margin-left: 10px;
-  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--field-bg);
 }
-.bar #filterSeg { margin-left: auto; align-self: center; }
+.bar #filterSeg { margin-left: auto; }
 .bar .search.inline { min-width: 280px; }
+
+/* Results filter: glass segmented control. (The player has its own .player .seg.) */
+.bar .seg {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  width: fit-content;
+  border-radius: var(--r-pill);
+}
+.bar .seg button {
+  padding: 7px 16px;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mute);
+  transition: color .2s, background .2s, box-shadow .2s;
+}
+.bar .seg button:hover { color: var(--fg); }
+.bar .seg button.on, .bar .seg button.active {
+  background: var(--seg-on);
+  color: var(--fg);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.35);
+}
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 24px;
+  gap: 20px;
 }
 
 .card {
   cursor: pointer;
-  transition: transform .15s ease;
+  padding: 10px;
+  border-radius: 24px;
+  transition: transform .35s cubic-bezier(.3, 1.3, .5, 1), box-shadow .3s;
+  animation: card-in .55s cubic-bezier(.2, .8, .2, 1) both;
 }
-.card:hover { transform: translateY(-2px); }
-.card:hover .card-art { outline: 2px solid var(--accent); outline-offset: 4px; }
+.card:hover {
+  transform: translateY(-5px) scale(1.015);
+  box-shadow: var(--glass-hl), 0 18px 40px rgba(20, 30, 60, 0.18), 0 2px 6px rgba(20, 30, 60, 0.08);
+}
+@keyframes card-in { from { opacity: 0; transform: translateY(14px) scale(0.98); } }
+@media (prefers-reduced-motion: reduce) { .card { animation: none; } }
 .card-art-wrap { position: relative; }
 .card-art {
   width: 100%;
   aspect-ratio: 1;
   display: block;
   object-fit: cover;
-  background: var(--line);
-  border-radius: var(--r);
+  background: var(--field-bg);
+  border-radius: 15px;
 }
 .motion-badge {
   position: absolute;
   top: 8px; left: 8px;
-  background: rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
   color: #fff;
-  font-family: var(--sans);
   font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0;
+  font-weight: 600;
   padding: 4px 10px;
   border-radius: var(--r-pill);
   display: inline-flex;
@@ -298,12 +459,13 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
   gap: 6px;
 }
 .motion-dot {
-  width: 8px; height: 8px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
   flex-shrink: 0;
 }
-.card-meta { padding: 12px 0 4px; }
+.card-meta { padding: 10px 4px 2px; }
 .card-title {
   font-weight: 600;
   font-size: 14px;
@@ -314,12 +476,9 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
   white-space: nowrap;
 }
 .card-artist {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--mute);
-  margin-top: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  margin-top: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -327,19 +486,18 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
 
 .foot {
   padding: 32px;
-  border-top: 1px solid var(--line);
-  font-family: var(--mono);
-  font-size: 11px;
+  text-align: center;
+  font-size: 12px;
   color: var(--mute);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 .hero.hidden { display: none; }
 
 .modal {
   position: fixed; inset: 0;
-  background: rgba(10,10,10,0.6);
+  background: rgba(0,0,0,0.38);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
   display: none;
   align-items: center;
   justify-content: center;
@@ -347,168 +505,385 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
   padding: 24px;
 }
 .modal.open { display: flex; }
-.modal-card {
-  background: var(--bg);
-  border: none;
-  border-radius: var(--r);
+/* ── Mini player, modelled on Musique's Classic layout: the cover blurred
+   as a backdrop over a palette gradient, a dark bottom fade so white text
+   always reads, plain white transport glyphs and a thin capsule scrubber.
+   Palette (--pg1..3) and the backdrop image are injected per track. ── */
+.player {
+  --ptx: #fff;
+  --pmu: rgba(255,255,255,0.65);
+  --pmu2: rgba(255,255,255,0.4);
+  --pln: rgba(255,255,255,0.18);
+  --pbg: #1b212a;
+  position: relative;
   width: 100%;
-  max-width: 920px;
-  max-height: 92vh;
+  max-width: 320px;
+  min-height: min(505px, calc(100dvh - 48px));
+  max-height: calc(100dvh - 48px);
+  border-radius: 22px;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  position: relative;
-}
-@media (max-width: 720px) {
-  .modal-card { grid-template-columns: 1fr; }
-}
-.modal-close {
-  position: absolute;
-  top: 12px; right: 12px;
-  width: 32px; height: 32px;
-  border: 1px solid var(--line);
-  background: var(--bg);
-  font-size: 18px;
-  z-index: 2;
-  border-radius: var(--r-pill);
-}
-.modal-art {
-  background: var(--line);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  min-height: 320px;
-  aspect-ratio: 1;
+  color: var(--ptx);
+  background: linear-gradient(135deg, var(--pg1, #2a3140), var(--pg2, #1b212a), var(--pg3, #0f1318));
+  isolation: isolate;
 }
-.modal-art img, .modal-art video {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
+@media (max-width: 420px) {
+  .modal { padding: 10px; }
+  .player { max-width: 100%; }
 }
-.modal-art.tall { aspect-ratio: 3 / 4; }
-.modal-art .badge {
-  position: absolute;
-  top: 12px; left: 12px;
-  background: var(--accent);
-  color: var(--accent-fg);
-  font-family: var(--mono);
-  font-size: 10px;
-  padding: 4px 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-radius: var(--r-pill);
+.player-backdrop { position: absolute; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
+.player-backdrop img {
+  position: absolute; inset: -20%; width: 140%; height: 140%; object-fit: cover;
+  filter: blur(60px) saturate(2.4) brightness(0.85); opacity: 0.78;
 }
-.modal-info {
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  border-left: 1px solid var(--line);
+.player-backdrop img:not([src]) { display: none; }
+.player-backdrop::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.45));
 }
-@media (max-width: 720px) {
-  .modal-info { border-left: none; border-top: 1px solid var(--line); }
+/* Dark base fade (guarantees contrast on light covers) + palette tint. */
+.player-fade {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 320px; z-index: -1; pointer-events: none;
+  background:
+    linear-gradient(to bottom, transparent, color-mix(in srgb, var(--pg1, #000) 15%, transparent) 40%, color-mix(in srgb, var(--pg1, #000) 55%, transparent)),
+    linear-gradient(to bottom, transparent, rgba(0,0,0,0.12) 33%, rgba(0,0,0,0.45) 66%, rgba(0,0,0,0.85));
 }
-.modal-head .t {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  margin-bottom: 6px;
+/* --head-h is the header row holding the copy/close capsule. The scrolling
+   body starts below it, so in Classic the capsule never covers the artwork —
+   not even when the options panel makes the body scroll. (Immersive's video
+   deliberately runs full bleed from the top, under the capsule.) */
+.player { --head-h: 70px; }
+.player-body {
+  flex: 1; min-width: 0;
+  margin-top: var(--head-h);
+  padding: 0 22px 14px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.modal-head .a {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--mute);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.player-body::-webkit-scrollbar { display: none; }
+.player .urlbox { scrollbar-width: none; -ms-overflow-style: none; }
+.player .urlbox::-webkit-scrollbar { display: none; }
+/* Top-right glass capsule: copy URL + close, in the header row above the art
+   (right edge lined up with the artwork's). */
+.top-pill {
+  position: absolute; top: 14px; right: 24px; z-index: 3;
+  display: flex; align-items: center; height: 46px; padding: 0 5px;
+  border-radius: 999px;
 }
-.row { display: flex; flex-direction: column; gap: 8px; }
-.lbl {
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--mute);
+/* Clear glass: light blur and a bright rim, no tint of its own. It dims what's
+   behind a little (like the iOS capsule turning grey over a white cover), so
+   the white glyphs still read on light artwork. Overrides .glass. */
+.top-pill.glass {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.55), inset 0 -1px 1px rgba(255,255,255,0.15), 0 6px 18px rgba(0,0,0,0.18);
+  backdrop-filter: blur(6px) saturate(170%) brightness(0.8);
+  -webkit-backdrop-filter: blur(6px) saturate(170%) brightness(0.8);
 }
-.seg {
-  display: flex;
-  flex-wrap: wrap;
-  border: 1px solid var(--line);
-  width: fit-content;
-  border-radius: var(--r-pill);
-  overflow: hidden;
+.top-pill button {
+  width: 50px; height: 38px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35)); /* keeps glyphs readable on light covers */
+  transition: background .15s, transform .15s;
 }
-.seg button {
-  padding: 8px 14px;
-  font-family: var(--mono);
-  font-size: 12px;
-  border-right: 1px solid var(--line);
-  color: var(--mute);
+.top-pill button:hover { background: rgba(255,255,255,0.18); }
+.top-pill button:active { transform: scale(0.9); }
+.top-pill svg { width: 21px; height: 21px; }
+.top-pill button.copied { color: #6ad3ff; }
+
+.player-art {
+  position: relative; border-radius: 14px; overflow: hidden;
+  aspect-ratio: 1; margin: 0 2px; background: rgba(255,255,255,0.06);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
 }
-.seg button:last-child { border-right: none; }
-.seg button.on, .seg button.active {
-  background: var(--accent);
-  color: var(--accent-fg);
+.player-art.tall { aspect-ratio: 3 / 4; }
+.player-art img, .player-art video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.player-art .poster { position: absolute; inset: 0; }
+.player-art video { position: relative; transition: opacity .35s ease; }
+.player-art.loading video { opacity: 0; }
+
+
+/* Quality reads as a plain text line ("LOSSLESS · DOLBY ATMOS"), Atmos brighter. */
+.player .quality { display: flex; flex-wrap: wrap; align-items: baseline; margin-top: 18px; }
+.player .quality:empty { display: none; }
+.player .qb {
+  font-family: var(--mono); font-size: 10px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.08em; color: rgba(255,255,255,0.8); white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6); /* no pill behind it now, so help it on light covers */
+}
+.player .qb + .qb::before { content: "\00b7"; margin: 0 7px; color: rgba(255,255,255,0.55); }
+.player .qb-atmos { color: #fff; font-weight: 700; }
+
+.player-head {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 8px; text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+.head-text { flex: 1; min-width: 0; }
+/* Open in Apple Music: a glass " Music" pill beside the title. */
+.head-btn {
+  flex-shrink: 0; height: 32px; padding: 0 13px 0 11px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 3px; color: #fff;
+  font-size: 13px; font-weight: 600; letter-spacing: -0.01em; text-shadow: none;
+  transition: transform .15s, background .15s;
+}
+.head-btn:hover { background: rgba(255,255,255,0.2); }
+.head-btn:active { transform: scale(0.94); }
+.head-btn svg { width: 15px; height: 15px; margin-top: -2px; }
+.player-head .t {
+  font-size: 17px; font-weight: 700; line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.player-head .a {
+  font-size: 13px; font-weight: 500; color: var(--pmu); margin-top: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Scrolling line (see layoutMarquee in app.js): no ellipsis, soft right edge. */
+.player-head .marquee {
+  text-overflow: clip;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+}
+.mq-track { display: inline-block; white-space: nowrap; will-change: transform; }
+.mq-track > span { display: inline-block; }
+
+.player-scrub { margin-top: 12px; }
+.player-scrub[hidden] { display: none; }
+/* Capsule sliders: the preview scrubber and the volume bar share one look. */
+.player-scrub input[type=range], .player-volume input[type=range] {
+  --pct: 0%;
+  display: block; width: 100%; height: 4px; margin: 0;
+  -webkit-appearance: none; appearance: none; border-radius: 999px; cursor: pointer;
+  background: linear-gradient(to right, rgba(255,255,255,0.78) var(--pct), rgba(255,255,255,0.18) var(--pct));
+}
+.player-scrub input[type=range]::-webkit-slider-thumb, .player-volume input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 0; height: 0; border: none; background: transparent;
+}
+.player-scrub input[type=range]::-moz-range-thumb, .player-volume input[type=range]::-moz-range-thumb { width: 0; height: 0; border: none; background: transparent; }
+.player-scrub:hover input[type=range]::-webkit-slider-thumb, .player-volume:hover input[type=range]::-webkit-slider-thumb { width: 10px; height: 10px; border-radius: 50%; background: #fff; }
+.player-scrub:hover input[type=range]::-moz-range-thumb, .player-volume:hover input[type=range]::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: #fff; }
+
+.player-volume { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.player-volume[hidden] { display: none; }
+.player-volume .vol-ic { flex-shrink: 0; width: 14px; height: 14px; color: var(--pmu2); }
+.player-volume button.vol-ic { display: flex; align-items: center; justify-content: center; transition: color .15s; }
+.player-volume button.vol-ic:hover { color: #fff; }
+.player-volume button.vol-ic svg { width: 14px; height: 14px; }
+.player-volume.muted input[type=range] { opacity: 0.45; }
+.player-scrub .times {
+  display: flex; align-items: center; margin-top: 5px;
+  font-size: 10px; font-weight: 600; color: var(--pmu2); font-variant-numeric: tabular-nums;
+}
+.player-scrub .times > span:first-child, .player-scrub .times > span:last-child { min-width: 34px; }
+.player-scrub .times > span:last-child { text-align: right; }
+.player-scrub .scrub-label { flex: 1; text-align: center; }
+
+.player-transport { display: flex; align-items: center; justify-content: space-evenly; margin-top: 10px; }
+.player-transport .tr {
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  color: #fff; background: transparent; border-radius: 50%; transition: transform .12s, opacity .12s;
+}
+.player-transport .tr svg { width: 20px; height: 20px; }
+.player-transport .tr.main svg { width: 30px; height: 30px; }
+.player-transport .tr:active:not(:disabled) { transform: scale(0.9); }
+.player-transport .tr:disabled { opacity: 0.3; cursor: default; }
+
+/* ── Bottom bar, after iOS 26 Liquid Glass tab bars: a glass capsule of
+   icon-over-label tabs (Still / 1:1 / 9:16) plus a separate round glass
+   ⋯ button. The selected tab sits on a dark pill that, on change, lifts
+   into a clear lens, slides with a springy overshoot and settles again. ── */
+.player-bar { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.glass {
+  background: rgba(38,38,44,0.42);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 8px 22px rgba(0,0,0,0.25);
+  backdrop-filter: blur(14px) saturate(170%); -webkit-backdrop-filter: blur(14px) saturate(170%);
+}
+.art-mode {
+  --n: 3; --i: 0;
+  position: relative; flex: 1; display: flex; padding: 4px;
+  border-radius: 999px;
+  touch-action: pan-y; user-select: none; -webkit-user-select: none; /* horizontal drags are ours */
+}
+.art-mode.dragging { cursor: grabbing; }
+.art-mode.dragging .glass-ind { transition: none; } /* follow the pointer 1:1 */
+.art-mode.dragging button { transition-delay: 0s; }
+/* While dragging, only the tab under the lens is lit. */
+.art-mode.dragging button.on:not(.peek) { color: rgba(255,255,255,0.9); }
+.art-mode.dragging button.on:not(.peek) svg rect { fill-opacity: 0; }
+.art-mode button.peek { color: #6ad3ff; }
+.art-mode[hidden] { display: none; }
+.art-mode button {
+  position: relative; z-index: 1; flex: 1; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 0 5px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,0.9);
+  transition: color .2s ease .12s;
+}
+.art-mode button svg { width: 20px; height: 20px; }
+.art-mode button.on { color: #6ad3ff; }
+.art-mode button.on svg rect { fill: currentColor; fill-opacity: 0.22; } /* filled glyph when selected */
+.art-mode.loading button.on svg { animation: art-loading 0.9s ease-in-out infinite; }
+@keyframes art-loading { 50% { opacity: 0.4; } }
+
+/* The indicator: one equal-width slot per tab, moved by --i. */
+.glass-ind {
+  position: absolute; top: 4px; bottom: 4px; left: 4px;
+  width: calc((100% - 8px) / var(--n));
+  transform: translateX(calc(var(--i) * 100%));
+  transition: transform .52s cubic-bezier(.3, 1.32, .5, 1);
+  pointer-events: none;
+}
+.art-mode.no-anim .glass-ind, .art-mode.no-anim .glass-lens { transition: none; }
+.glass-lens {
+  position: absolute; inset: 0; border-radius: 999px;
+  background: rgba(0,0,0,0.34);
+  transition: transform .34s cubic-bezier(.3, 1.45, .5, 1), background .25s, box-shadow .25s, border-color .25s;
+  border: 1px solid transparent;
+}
+/* While moving, the pill lifts above the tabs as a clear lens: bigger,
+   brightening what's under it, with a light rim and faint chromatic edges. */
+.art-mode.lift .glass-ind { z-index: 2; }
+.art-mode.lift .glass-lens {
+  transform: scale(1.2, 1.34);
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.35);
+  backdrop-filter: brightness(1.3) saturate(1.9); -webkit-backdrop-filter: brightness(1.3) saturate(1.9);
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.6), inset 0 -1px 2px rgba(255,255,255,0.2),
+    -3px 0 8px rgba(90,210,255,0.35), 3px 0 8px rgba(255,90,210,0.25),
+    0 8px 20px rgba(0,0,0,0.35);
 }
 
-.select { display: inline-block; }
-.select[hidden] { display: none; }
-.select select {
-  font-family: var(--mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--fg);
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-  padding: 8px 32px 8px 14px;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, var(--fg) 50%), linear-gradient(135deg, var(--fg) 50%, transparent 50%);
-  background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
-  background-size: 5px 5px;
-  background-repeat: no-repeat;
+@media (prefers-reduced-motion: reduce) {
+  .glass-ind, .glass-lens { transition: none; }
+  .art-mode.lift .glass-ind { z-index: auto; }
+  .art-mode.lift .glass-lens { transform: none; background: rgba(0,0,0,0.34); border-color: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
-.select select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.18); }
 
-.actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 18px;
-  border: 1px solid var(--line-strong);
-  font-family: var(--mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: var(--bg);
-  border-radius: var(--r-pill);
+.menu-btn {
+  flex-shrink: 0; margin-left: auto; width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  transition: transform .15s;
 }
-.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
-.btn.primary:hover { background: #ff1f3d; border-color: #ff1f3d; }
-.btn:hover { transform: translateY(-1px); }
+.menu-btn:active { transform: scale(0.92); }
+.menu-btn[aria-expanded="true"] { background: rgba(255,255,255,0.18); }
+.menu-btn svg { width: 20px; height: 20px; }
 
-.urlbox {
-  font-family: var(--mono);
-  font-size: 11px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  background: var(--card);
-  word-break: break-all;
-  color: var(--mute);
-  max-height: 80px;
-  overflow: auto;
-  border-radius: var(--r-sm);
+/* ⋯ menu. Lives on the card, not in the scrolling body, so it never gets
+   clipped; app.js places it just above the menu button. */
+.player-menu {
+  position: absolute; z-index: 5; min-width: 210px; padding: 6px;
+  display: flex; flex-direction: column;
+  background: rgba(22,22,28,0.88); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+  backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+.player-menu[hidden] { display: none; }
+.player-menu > a, .player-menu > button {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border-radius: 8px; text-align: left;
+  font-size: 13px; font-weight: 500; color: #fff;
+}
+.player-menu > a:hover, .player-menu > button:hover { background: rgba(255,255,255,0.1); }
+.player-menu svg { width: 15px; height: 15px; flex-shrink: 0; color: rgba(255,255,255,0.7); }
+.player-menu #adjBtn[aria-expanded="true"] { background: rgba(255,255,255,0.08); }
+
+/* ── Immersive layout (Musique's tallLayout), used while tall 9:16 motion
+   plays: the video runs edge to edge over the top 85% and fades out over
+   its last 250px into the palette gradient, with the controls laid over
+   the bottom. ── */
+.player.immersive {
+  height: min(505px, calc(100dvh - 48px));
+  background: linear-gradient(135deg, var(--pg2, #1b212a), var(--pg2, #1b212a), var(--pg3, #0f1318));
+}
+.player.immersive .player-backdrop { display: none; }
+.player.immersive .player-art {
+  position: absolute; top: 0; left: 0; right: 0; z-index: -2; /* under .player-fade */
+  /* Full bleed from the top edge, under the capsule. The box takes the
+     video's own ratio (--vr, set in app.js) at full card width, so 'cover'
+     never crops the sides; only a ratio taller than the card trims top/bottom. */
+  height: auto; aspect-ratio: var(--vr, 3 / 4); max-height: 100%; margin: 0;
+  border-radius: 0; box-shadow: none; background: transparent;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 250px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 250px), transparent);
+}
+.player.immersive .player-body {
+  display: flex; flex-direction: column;
+  padding: 0 22px 14px;
+}
+/* Spacer that pushes the controls to the bottom but collapses when the
+   options panel makes the content taller than the card, so it can scroll. */
+.player.immersive .player-body::before { content: ""; flex: 1 0 0; }
+.player.immersive .quality { margin-top: 0; }
+.player.immersive .player-head .t { font-size: 20px; font-weight: 800; }
+.player.immersive .player-head .a { font-size: 15px; color: rgba(255,255,255,0.55); margin-top: 3px; }
+.player.immersive .player-scrub { margin-top: 16px; }
+.player.immersive .player-scrub input[type=range] { height: 5px; }
+.player.immersive .player-scrub .times { font-size: 11px; margin-top: 6px; }
+.player.immersive .player-transport { margin-top: 14px; }
+.player.immersive .player-transport .tr svg { width: 24px; height: 24px; }
+.player.immersive .player-transport .tr.main svg { width: 40px; height: 40px; }
+.player.immersive .player-bar { margin-top: 10px; }
+
+.player-adjust {
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--pln);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.player-adjust[hidden] { display: none; }
+
+.player .row { display: flex; flex-direction: column; gap: 8px; }
+.player .row[hidden] { display: none; }
+.player .lbl {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--pmu);
+}
+.player .seg {
+  display: flex; flex-wrap: wrap; border: 1px solid var(--pln);
+  width: fit-content; border-radius: var(--r-pill); overflow: hidden;
+}
+.player .seg button {
+  padding: 7px 14px; font-family: var(--mono); font-size: 12px;
+  border-right: 1px solid var(--pln); color: var(--pmu); background: transparent;
+}
+.player .seg button:last-child { border-right: none; }
+.player .seg button.on, .player .seg button.active { background: #fff; color: #111; }
+.player .select { display: inline-block; }
+.player .select[hidden] { display: none; }
+.player .select select {
+  font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--ptx); background: transparent; border: 1px solid var(--pln);
+  border-radius: var(--r-pill); padding: 7px 14px; cursor: pointer;
+}
+.player .select select option { color: #111; }
+.player .urlbox {
+  font-family: var(--mono); font-size: 11px; padding: 10px 12px;
+  border: 1px solid var(--pln); background: rgba(0,0,0,0.14);
+  word-break: break-all; color: var(--pmu); max-height: 70px; overflow: auto; border-radius: var(--r-sm);
+}
+
+/* The floating nav gets crowded once the search pill shows; shed extras early. */
+@media (max-width: 900px) {
+  body.has-results .nav-meta, body.has-results .switch-label { display: none; }
+  body.has-results .theme-switch { padding: 0 4px; }
+  .nav .nav-search { min-width: 0; }
 }
 
 @media (max-width: 640px) {
   main { padding: 0 20px; }
-  .nav { padding: 16px 20px; }
+  .nav { width: calc(100% - 20px); margin-top: 10px; top: 10px; padding: 6px 6px 6px 14px; gap: 10px; }
+  .nav .nav-search { min-width: 0; }
+  .nav-right { gap: 8px; }
+  .nav-meta, .switch-label { display: none; }
+  .theme-switch { padding: 0 4px; }
+  .brand > span:not(.brand-icon) { display: none; }
+  /* With results, the nav search needs the room: keep just the app icon. */
+  body.has-results .brand { font-size: 0; gap: 0; }
+  body.has-results .github-link { display: none; }
+  .search { height: 54px; padding-left: 16px; }
+  .search-go { width: 40px; height: 40px; }
   .hero { padding: 48px 0 48px; }
-  .bar { flex-direction: column; align-items: stretch; }
+  .bar { flex-wrap: wrap; }
+  .bar #filterSeg { margin-left: 0; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
 }
