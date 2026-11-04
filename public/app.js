@@ -4,6 +4,8 @@ const el = {
   searchInput: byId('searchInput'),
   searchInputNav: byId('searchInputNav'),
   searchClear: byId('searchClear'),
+  searchClearNav: byId('searchClearNav'),
+  searchGo: byId('searchGo'),
   nav: document.querySelector('.nav'),
   heroSection: byId('heroSection'),
   status: byId('status'),
@@ -15,6 +17,7 @@ const el = {
   playerCard: byId('playerCard'),
   modalArtwork: byId('modalArtwork'),
   modalCloseBtn: byId('modalCloseBtn'),
+  topCopyBtn: byId('topCopyBtn'),
   artMode: byId('artMode'),
   qualityBadges: byId('qualityBadges'),
   mTitle: byId('mTitle'),
@@ -109,6 +112,7 @@ async function search() {
 
   el.searchInput.value = term;
   el.searchInputNav.value = term;
+  syncClearButtons();
 
   document.body.classList.add('has-results');
   el.heroSection.classList.add('hidden');
@@ -305,8 +309,9 @@ function openModal(i) {
 
   applyColors(it.colors, it);
 
-  el.mTitle.textContent = it.track;
-  el.mArtist.textContent = it.artist + (it.album ? ' · ' + it.album : '');
+  el.mTitle.dataset.text = it.track;
+  el.mArtist.dataset.text = it.artist + (it.album ? ' · ' + it.album : '');
+  refreshMarquees(); // sets the text; measured again below once the modal is visible
   el.appleBtn.href = it.trackViewUrl || it.collectionViewUrl || '#';
 
   const badges = qualityBadges(it.audioTraits);
@@ -403,6 +408,7 @@ function openModal(i) {
   // Open first so the Classic card has a measurable height before a
   // remembered 9:16 choice switches it to Immersive.
   el.modal.classList.add('open');
+  refreshMarquees();
   if (motionOn) motionTarget()?.click();
   quietArtMode = false;
 }
@@ -490,7 +496,10 @@ function renderArt() {
     card.style.removeProperty('height');
   }
   art.classList.toggle('tall', tallMotion);
+  const layoutChanged = card.classList.contains('immersive') !== tallMotion;
   card.classList.toggle('immersive', tallMotion);
+  // Immersive uses bigger type, so whether a line overflows can change.
+  if (layoutChanged && el.modal.classList.contains('open')) refreshMarquees();
   renderArtMode();
 
   if (currentAnim) {
@@ -509,9 +518,16 @@ function renderArt() {
     };
     video.addEventListener('loadeddata', ready, { once: true });
     video.addEventListener('error', ready, { once: true });
+    // Immersive sizes its box to the video's real ratio (see --vr in CSS).
+    video.addEventListener('loadedmetadata', () => {
+      if (art.contains(video) && video.videoWidth) {
+        art.style.setProperty('--vr', `${video.videoWidth} / ${video.videoHeight}`);
+      }
+    }, { once: true });
     setMotionLinks();
   } else {
     const url = urlForSize(current, currentSize);
+    art.style.removeProperty('--vr');
     art.classList.remove('loading');
     el.artMode.classList.remove('loading');
     art.innerHTML = `<img src="${url}" alt="">`;
@@ -526,6 +542,53 @@ function setMotionLinks() {
   el.dlBtn.download = (current.track || 'artwork') + (currentTall ? '-tall.mp4' : '.mp4');
   el.urlBox.textContent = currentAnim;
 }
+
+// ── Marquee (after Musique's MarqueeText): a line too long for its box waits
+// 1.2s, then scrolls left at 28px/s with a second copy 36px behind, looping
+// seamlessly. Lines that fit stay still. Text lives in data-text.
+const MQ_GAP = 36, MQ_SPEED = 28, MQ_DELAY = 1200;
+const marqueeAnims = new WeakMap();
+
+function layoutMarquee(node) {
+  const text = node.dataset.text ?? '';
+  marqueeAnims.get(node)?.cancel();
+  node.classList.remove('marquee');
+  node.textContent = text;
+  if (!node.clientWidth) return; // hidden; measured again once shown
+  if (node.scrollWidth <= node.clientWidth + 1) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; // keep the ellipsis
+
+  const first = document.createElement('span');
+  first.textContent = text;
+  const second = document.createElement('span');
+  second.textContent = text;
+  second.setAttribute('aria-hidden', 'true');
+  second.style.marginLeft = MQ_GAP + 'px';
+  const track = document.createElement('span');
+  track.className = 'mq-track';
+  track.append(first, second);
+  node.replaceChildren(track);
+  node.classList.add('marquee');
+
+  const loop = first.offsetWidth + MQ_GAP;
+  const cycle = MQ_DELAY + (loop / MQ_SPEED) * 1000;
+  marqueeAnims.set(node, track.animate([
+    { transform: 'translateX(0)' },
+    { transform: 'translateX(0)', offset: MQ_DELAY / cycle },
+    { transform: `translateX(${-loop}px)` },
+  ], { duration: cycle, iterations: Infinity }));
+}
+
+function refreshMarquees() {
+  layoutMarquee(el.mTitle);
+  layoutMarquee(el.mArtist);
+}
+
+let marqueeResize = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(marqueeResize);
+  marqueeResize = setTimeout(() => { if (el.modal.classList.contains('open')) refreshMarquees(); }, 150);
+});
 
 function closeModal() {
   closeMenu();
@@ -566,21 +629,46 @@ async function copyUrl() {
   } catch {}
 }
 
+// Copy button in the top capsule: same URL, the icon flips to a check briefly.
+const TOP_COPY_HTML = el.topCopyBtn.innerHTML;
+const TOP_CHECK_HTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+let topCopyTimer = 0;
+async function copyUrlTop() {
+  try {
+    await navigator.clipboard.writeText(el.urlBox.textContent);
+    el.topCopyBtn.innerHTML = TOP_CHECK_HTML;
+    el.topCopyBtn.classList.add('copied');
+    clearTimeout(topCopyTimer);
+    topCopyTimer = setTimeout(() => {
+      el.topCopyBtn.innerHTML = TOP_COPY_HTML;
+      el.topCopyBtn.classList.remove('copied');
+    }, 1200);
+  } catch {}
+}
+
 // ── Events ──
 el.searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
 el.searchInputNav.addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
 
-el.searchInput.addEventListener('input', () => {
-  el.searchClear.classList.toggle('show', el.searchInput.value.length > 0);
-});
-el.searchClear.addEventListener('click', () => {
-  el.searchInput.value = '';
-  el.searchClear.classList.remove('show');
-  el.searchInput.focus();
-});
+el.searchGo.addEventListener('click', search);
+
+// Each search field shows its clear (×) only while it has text.
+const searchFields = [[el.searchInput, el.searchClear], [el.searchInputNav, el.searchClearNav]];
+function syncClearButtons() {
+  for (const [input, clear] of searchFields) clear.classList.toggle('show', input.value.length > 0);
+}
+for (const [input, clear] of searchFields) {
+  input.addEventListener('input', syncClearButtons);
+  clear.addEventListener('click', () => {
+    input.value = '';
+    syncClearButtons();
+    input.focus();
+  });
+}
 
 el.modal.addEventListener('click', (e) => { if (e.target === el.modal) closeModal(); });
 el.modalCloseBtn.addEventListener('click', closeModal);
+el.topCopyBtn.addEventListener('click', copyUrlTop);
 
 el.sizeSeg.querySelectorAll('button').forEach(b => {
   b.addEventListener('click', () => {
@@ -682,7 +770,6 @@ el.menuBtn.addEventListener('click', () => {
   else closeMenu();
 });
 el.dlBtn.addEventListener('click', closeMenu);
-el.appleBtn.addEventListener('click', closeMenu);
 document.addEventListener('click', (e) => {
   if (!el.playerMenu.hidden && !e.target.closest('#playerMenu, #menuBtn')) closeMenu();
 });
@@ -739,3 +826,16 @@ byId('themeToggle').addEventListener('click', () => {
   document.documentElement.dataset.theme = next;
   localStorage.setItem('theme', next);
 });
+
+// GitHub star count beside the nav's GitHub mark (served and cached by /api/stars).
+(async () => {
+  try {
+    const { stars } = await (await fetch('/api/stars')).json();
+    if (typeof stars !== 'number') return;
+    byId('ghStarCount').textContent = stars >= 1000 ? (stars / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(stars);
+    byId('ghStars').hidden = false;
+    const link = document.querySelector('.github-link');
+    link.classList.add('has-stars');
+    link.setAttribute('aria-label', `GitHub, ${stars} star${stars === 1 ? '' : 's'}`);
+  } catch {}
+})();

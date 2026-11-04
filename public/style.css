@@ -166,6 +166,16 @@ body.has-results .nav .nav-search { display: flex; }
 }
 .github-link:hover { transform: scale(1.06); }
 .github-link svg { width: 17px; height: 17px; }
+/* With a star count the circle becomes a pill: GitHub mark · ★ n. */
+.github-link.has-stars { width: auto; padding: 0 12px 0 10px; gap: 7px; border-radius: var(--r-pill); }
+.github-link.has-stars:hover { transform: scale(1.04); }
+.gh-stars {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding-left: 7px; border-left: 1px solid var(--line);
+  font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.gh-stars[hidden] { display: none; }
+.gh-stars svg { width: 13px; height: 13px; color: #f5b400; }
 
 /* iOS-style switch inside a glass pill (theme toggle). */
 .theme-switch {
@@ -224,61 +234,90 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
 }
 .hero h1 .dot { color: var(--accent); }
 
+/* ── Search field, after iOS 26: a glass capsule with the magnifier on the
+   left, a clear (×) that appears once there's text, and a round accent
+   submit button. Focus lifts the glass with a soft glow, not a hard ring. ── */
 .search {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 14px 14px 14px 24px;
-  gap: 12px;
+  height: 60px;
+  padding: 0 8px 0 20px;
+  gap: 10px;
   border-radius: var(--r-pill);
-  transition: box-shadow .2s, border-color .2s;
+  transition: box-shadow .25s, border-color .25s, background .25s;
 }
 .search:focus-within {
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--glass-border));
-  box-shadow: var(--glass-hl), var(--glass-shadow), 0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent);
+  background: color-mix(in srgb, var(--glass-bg) 70%, var(--seg-on));
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--glass-border));
+  box-shadow: var(--glass-hl), var(--glass-shadow), 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent),
+    0 12px 36px color-mix(in srgb, var(--accent) 16%, transparent);
 }
-.search-icon { width: 18px; height: 18px; color: var(--mute); flex-shrink: 0; }
+.search-icon { width: 20px; height: 20px; color: var(--mute); flex-shrink: 0; transition: color .2s; }
 .search:focus-within .search-icon { color: var(--accent); }
 .search input {
   flex: 1;
+  height: 100%;
   font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   background: transparent;
   min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
 }
-.search input::placeholder { color: var(--mute); }
-.search button {
+.search input::placeholder { color: var(--mute); font-weight: 400; }
+.search input::-webkit-search-cancel-button,
+.search input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+
+/* Clear (×): filled circle, only while there's text. */
+.search-clear {
+  flex-shrink: 0;
   width: 22px; height: 22px;
-  border-radius: 50%;
-  background: var(--field-bg);
-  color: var(--mute);
-  font-size: 14px;
-  display: none;
-  align-items: center; justify-content: center;
-  line-height: 1;
+  display: none; align-items: center; justify-content: center;
+  color: var(--mute); opacity: 0.75;
+  transition: opacity .15s, transform .15s;
 }
-.search button.show { display: flex; }
-.search kbd {
-  font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 600;
-  min-width: 36px; height: 32px; padding: 0 10px;
-  display: inline-flex; align-items: center; justify-content: center;
-  border-radius: var(--r-pill);
-  background: var(--field-bg);
-  color: var(--mute);
+.search-clear.show { display: flex; }
+.search-clear:hover { opacity: 1; }
+.search-clear:active { transform: scale(0.88); }
+.search-clear svg { width: 18px; height: 18px; }
+
+/* Submit: round accent button, muted until there's something to search. */
+.search-go {
+  flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  background: linear-gradient(160deg, #ff5f6d, var(--accent));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: transform .2s cubic-bezier(.3, 1.4, .5, 1), opacity .2s, filter .2s;
 }
+.search-go svg { width: 20px; height: 20px; }
+.search-go:hover { transform: scale(1.06); }
+.search-go:active { transform: scale(0.92); }
+.search:has(input:placeholder-shown) .search-go { opacity: 0.45; filter: saturate(0.6); box-shadow: none; }
+
 /* Compact search pill inside the nav. */
 .search.inline {
-  padding: 8px 14px;
+  height: 36px;
+  padding: 0 10px 0 12px;
+  gap: 8px;
   background: var(--field-bg);
   border: 1px solid transparent;
   box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-.search.inline:focus-within { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent); }
-.search.inline input { font-size: 14px; }
-.search.inline .search-icon { width: 14px; height: 14px; }
+.search.inline:focus-within {
+  background: var(--field-bg);
+  border-color: transparent;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.search.inline input { font-size: 14px; font-weight: 500; }
+.search.inline .search-icon { width: 15px; height: 15px; }
+.search.inline .search-clear { width: 18px; height: 18px; }
+.search.inline .search-clear svg { width: 15px; height: 15px; }
 
 .caps {
   list-style: none;
@@ -509,9 +548,15 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
     linear-gradient(to bottom, transparent, color-mix(in srgb, var(--pg1, #000) 15%, transparent) 40%, color-mix(in srgb, var(--pg1, #000) 55%, transparent)),
     linear-gradient(to bottom, transparent, rgba(0,0,0,0.12) 33%, rgba(0,0,0,0.45) 66%, rgba(0,0,0,0.85));
 }
+/* --head-h is the header row holding the copy/close capsule. The scrolling
+   body starts below it, so in Classic the capsule never covers the artwork —
+   not even when the options panel makes the body scroll. (Immersive's video
+   deliberately runs full bleed from the top, under the capsule.) */
+.player { --head-h: 70px; }
 .player-body {
   flex: 1; min-width: 0;
-  padding: 28px 22px 14px;
+  margin-top: var(--head-h);
+  padding: 0 22px 14px;
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -519,13 +564,33 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
 .player-body::-webkit-scrollbar { display: none; }
 .player .urlbox { scrollbar-width: none; -ms-overflow-style: none; }
 .player .urlbox::-webkit-scrollbar { display: none; }
-.player-close {
-  position: absolute; top: 38px; right: 34px; z-index: 3;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: rgba(0,0,0,0.35); color: #fff;
-  border: 1px solid rgba(255,255,255,0.15); font-size: 15px; line-height: 1;
-  display: flex; align-items: center; justify-content: center;
+/* Top-right glass capsule: copy URL + close, in the header row above the art
+   (right edge lined up with the artwork's). */
+.top-pill {
+  position: absolute; top: 14px; right: 24px; z-index: 3;
+  display: flex; align-items: center; height: 46px; padding: 0 5px;
+  border-radius: 999px;
 }
+/* Clear glass: light blur and a bright rim, no tint of its own. It dims what's
+   behind a little (like the iOS capsule turning grey over a white cover), so
+   the white glyphs still read on light artwork. Overrides .glass. */
+.top-pill.glass {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.55), inset 0 -1px 1px rgba(255,255,255,0.15), 0 6px 18px rgba(0,0,0,0.18);
+  backdrop-filter: blur(6px) saturate(170%) brightness(0.8);
+  -webkit-backdrop-filter: blur(6px) saturate(170%) brightness(0.8);
+}
+.top-pill button {
+  width: 50px; height: 38px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35)); /* keeps glyphs readable on light covers */
+  transition: background .15s, transform .15s;
+}
+.top-pill button:hover { background: rgba(255,255,255,0.18); }
+.top-pill button:active { transform: scale(0.9); }
+.top-pill svg { width: 21px; height: 21px; }
+.top-pill button.copied { color: #6ad3ff; }
 
 .player-art {
   position: relative; border-radius: 14px; overflow: hidden;
@@ -550,7 +615,21 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
 .player .qb + .qb::before { content: "\00b7"; margin: 0 7px; color: rgba(255,255,255,0.55); }
 .player .qb-atmos { color: #fff; font-weight: 700; }
 
-.player-head { margin-top: 8px; text-shadow: 0 1px 3px rgba(0,0,0,0.35); }
+.player-head {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 8px; text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+.head-text { flex: 1; min-width: 0; }
+/* Open in Apple Music: a glass " Music" pill beside the title. */
+.head-btn {
+  flex-shrink: 0; height: 32px; padding: 0 13px 0 11px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 3px; color: #fff;
+  font-size: 13px; font-weight: 600; letter-spacing: -0.01em; text-shadow: none;
+  transition: transform .15s, background .15s;
+}
+.head-btn:hover { background: rgba(255,255,255,0.2); }
+.head-btn:active { transform: scale(0.94); }
+.head-btn svg { width: 15px; height: 15px; margin-top: -2px; }
 .player-head .t {
   font-size: 17px; font-weight: 700; line-height: 1.25;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -559,6 +638,14 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
   font-size: 13px; font-weight: 500; color: var(--pmu); margin-top: 4px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+/* Scrolling line (see layoutMarquee in app.js): no ellipsis, soft right edge. */
+.player-head .marquee {
+  text-overflow: clip;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+}
+.mq-track { display: inline-block; white-space: nowrap; will-change: transform; }
+.mq-track > span { display: inline-block; }
 
 .player-scrub { margin-top: 12px; }
 .player-scrub[hidden] { display: none; }
@@ -713,7 +800,10 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
 .player.immersive .player-backdrop { display: none; }
 .player.immersive .player-art {
   position: absolute; top: 0; left: 0; right: 0; z-index: -2; /* under .player-fade */
-  height: 85%; margin: 0; aspect-ratio: auto;
+  /* Full bleed from the top edge, under the capsule. The box takes the
+     video's own ratio (--vr, set in app.js) at full card width, so 'cover'
+     never crops the sides; only a ratio taller than the card trims top/bottom. */
+  height: auto; aspect-ratio: var(--vr, 3 / 4); max-height: 100%; margin: 0;
   border-radius: 0; box-shadow: none; background: transparent;
   -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 250px), transparent);
   mask-image: linear-gradient(to bottom, #000 calc(100% - 250px), transparent);
@@ -787,6 +877,11 @@ main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 32px;
   .nav-meta, .switch-label { display: none; }
   .theme-switch { padding: 0 4px; }
   .brand > span:not(.brand-icon) { display: none; }
+  /* With results, the nav search needs the room: keep just the app icon. */
+  body.has-results .brand { font-size: 0; gap: 0; }
+  body.has-results .github-link { display: none; }
+  .search { height: 54px; padding-left: 16px; }
+  .search-go { width: 40px; height: 40px; }
   .hero { padding: 48px 0 48px; }
   .bar { flex-wrap: wrap; }
   .bar #filterSeg { margin-left: 0; }

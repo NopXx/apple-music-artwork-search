@@ -24,12 +24,14 @@
     </a>
     <div class="nav-search search inline">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
-      <input id="searchInputNav" type="text" placeholder="Search again">
+      <input id="searchInputNav" type="search" enterkeyhint="search" autocomplete="off" placeholder="Search" aria-label="Search again">
+      <button id="searchClearNav" class="search-clear" type="button" aria-label="Clear"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path d="M8.5 8.5l7 7m0-7-7 7" stroke="var(--bg)" stroke-width="2" stroke-linecap="round"/></svg></button>
     </div>
     <div class="nav-right">
       <span class="nav-meta">v1 · apple music</span>
       <a href="https://github.com/NopXx/apple-music-artwork-search" target="_blank" rel="noopener" class="github-link" aria-label="GitHub">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+        <span class="gh-stars" id="ghStars" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.8l2.83 5.74 6.33.92-4.58 4.47 1.08 6.3L12 17.25l-5.66 2.98 1.08-6.3L2.84 9.46l6.33-.92z"/></svg><span id="ghStarCount"></span></span>
       </a>
       <button id="themeToggle" class="theme-switch" aria-label="Toggle theme" role="switch">
         <span class="switch-track"><span class="switch-thumb"></span></span>
@@ -44,9 +46,9 @@
       <h1>Search<br>any Apple Music<br>release<span class="dot">.</span></h1>
       <div class="search">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
-        <input id="searchInput" type="text" placeholder="artist, song, album, or paste a music.apple.com URL" autofocus>
-        <button id="searchClear" type="button" aria-label="Clear">×</button>
-        <kbd>↵</kbd>
+        <input id="searchInput" type="search" enterkeyhint="search" autocomplete="off" placeholder="Artist, song, album, or link" aria-label="Search Apple Music" autofocus>
+        <button id="searchClear" class="search-clear" type="button" aria-label="Clear"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path d="M8.5 8.5l7 7m0-7-7 7" stroke="var(--bg)" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button id="searchGo" class="search-go" type="button" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
       </div>
       <ul class="caps">
         <li>3000 px stills</li>
@@ -80,10 +82,16 @@
       <div class="player-menu" id="playerMenu" role="menu" hidden>
         <a role="menuitem" id="dlBtn" href="#" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Download</span></a>
         <button role="menuitem" id="copyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy URL</span></button>
-        <a role="menuitem" id="appleBtn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg><span>Open in Apple Music</span></a>
         <button role="menuitem" id="adjBtn" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span>Size &amp; motion options</span></button>
       </div>
-      <button class="player-close" id="modalCloseBtn" aria-label="Close">×</button>
+      <div class="top-pill glass" role="group" aria-label="Artwork actions">
+        <button id="topCopyBtn" aria-label="Copy URL" title="Copy URL">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></svg>
+        </button>
+        <button id="modalCloseBtn" aria-label="Close" title="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
 
       <div class="player-body">
       <div class="player-art" id="modalArtwork"></div>
@@ -91,8 +99,13 @@
       <div class="quality" id="qualityBadges"></div>
 
       <div class="player-head">
-        <div class="t" id="mTitle"></div>
-        <div class="a" id="mArtist"></div>
+        <div class="head-text">
+          <div class="t" id="mTitle"></div>
+          <div class="a" id="mArtist"></div>
+        </div>
+        <a class="head-btn glass" id="appleBtn" href="#" target="_blank" rel="noopener" aria-label="Open in Apple Music" title="Open in Apple Music">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg><span>Music</span>
+        </a>
       </div>
 
       <div class="player-scrub">
